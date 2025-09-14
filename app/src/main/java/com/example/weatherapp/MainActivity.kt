@@ -114,10 +114,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun HomeScreen(navController: NavController, vm: GeoLocationViewModel = viewModel()) {
+private fun HomeScreen(navController: NavController, vm: ForecastViewModel = viewModel()) {
     val state by vm.state.collectAsState()
 
-    LaunchedEffect(Unit) { vm.fetch() }
+    LaunchedEffect(Unit) { vm.fetchForecast() }
 
     when {
         state.loading -> Box(modifier = Modifier.fillMaxSize()) {
@@ -126,31 +126,34 @@ private fun HomeScreen(navController: NavController, vm: GeoLocationViewModel = 
 
         else -> {
             Log.i("Habibi", state.data.toString());
-            CWeatherEntryList(
-                weatherEntries = weatherEntries,
-                navController = navController
-            )
+            val data = state.data
+            if (data != null) {
+                CWeatherEntryList(
+                    weatherEntries = data.list,
+                    navController = navController
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CWeatherEntry(weatherEntry: WeatherEntry, onClick: (id: Int) -> Unit) {
+private fun CWeatherEntry(weatherEntry: WeatherDataResponse, onClick: (id: Int) -> Unit) {
 
     Column(
         modifier = Modifier
-            .clickable { onClick(weatherEntry.id) }
+            .clickable { onClick(weatherEntry.dt) }
             .padding(16.dp)
     ) {
-        Text(text = weatherEntry.dateTime)
-        Text(text = weatherEntry.icon)
-        Text(text = weatherEntry.temperature.toString())
+        Text(text = "weatherEntry.weather[")
+        Text(text = weatherEntry.weather[0].icon)
+        Text(text = weatherEntry.main.temp_max.toString())
     }
 }
 
 @Composable
 private fun CWeatherEntryList(
-    weatherEntries: List<WeatherEntry>,
+    weatherEntries: List<WeatherDataResponse>,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -174,6 +177,9 @@ object ApiModule {
     @Volatile
     private var _service: GeoLocationService? = null
 
+    @Volatile
+    private var _forecastService: ForecastService? = null
+
     fun init(context: Context) {
         val apiKey = context.getString(R.string.api_key)
         val client = OkHttpClient.Builder()
@@ -185,8 +191,17 @@ object ApiModule {
             .client(client)
             .build()
         _service = retrofit.create(GeoLocationService::class.java)
+        val forecastClient = Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/data/2.5/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(client)
+            .build()
+        _forecastService = forecastClient.create(ForecastService::class.java)
     }
 
     val geoLocationService: GeoLocationService
         get() = checkNotNull(_service) { "ApiModule.init(context) not called" }
+    val forecastService: ForecastService
+        get() = checkNotNull(_forecastService) { "ApiModule.init(context) not called" }
+
 }
