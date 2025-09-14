@@ -145,7 +145,7 @@ private fun CWeatherEntry(weatherEntry: WeatherDataResponse, onClick: (id: Int) 
             .clickable { onClick(weatherEntry.dt) }
             .padding(16.dp)
     ) {
-        Text(text = "weatherEntry.weather[")
+        Text(text = weatherEntry.dt_txt)
         Text(text = weatherEntry.weather[0].icon)
         Text(text = weatherEntry.main.temp_max.toString())
     }

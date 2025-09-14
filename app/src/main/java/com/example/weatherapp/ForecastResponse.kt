@@ -22,18 +22,19 @@ data class WeatherDataResponse(
     val weather: List<WeatherDataWeatherResponse>,
     val clouds: WeatherDataCloudResponse,
     val wind: WeatherDataWindResponse,
-    val sys: WeatherDataSysResponse
+    val sys: WeatherDataSysResponse,
+    val dt_txt: String
 )
 
 @Serializable
 data class WeatherDataMainResponse(
     val temp: Float,
     val feelsLike: Float,
-    val tempMin: Float,
+    val temp_min: Float,
     val temp_max: Float,
     val pressure: Int,
-    val seaLevel: Int,
-    val grndLevel: Float,
+    val sea_level: Int,
+    val grnd_level: Float,
     val humidity: Float,
     val tempKf: Float,
 )
