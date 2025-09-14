@@ -2,6 +2,7 @@ package com.example.weatherapp.ui.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ fun CWeatherEntry(weatherEntry: WeatherDataResponse, onClick: (id: WeatherDataRe
         modifier = Modifier
             .clickable { onClick(weatherEntry) }
             .padding(16.dp)
+            .fillMaxWidth()
     ) {
         Text(text = weatherEntry.dt_txt)
         Text(text = weatherEntry.weather[0].icon)
