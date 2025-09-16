@@ -28,20 +28,23 @@ import com.example.weatherapp.ForecastViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController, vm: ForecastViewModel = viewModel()) {
+fun HomeScreen(
+    navController: NavController,
+    vm: ForecastViewModel = viewModel(),
+) {
     val state by vm.state.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { vm.fetchForecast() }
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text("Weather App")
                 },
                 actions = {
-                    Box{
+                    Box {
                         IconButton(
                             onClick = {
                                 isExpanded = !isExpanded
@@ -53,18 +56,18 @@ fun HomeScreen(navController: NavController, vm: ForecastViewModel = viewModel()
                             )
                         }
                         DropdownMenu(
-                            onDismissRequest = {isExpanded = false},
+                            onDismissRequest = { isExpanded = false },
                             expanded = isExpanded
                         ) {
                             DropdownMenuItem(
-                                text = {Text("Settings")},
+                                text = { Text("Settings") },
                                 onClick = {
                                     isExpanded = false
                                     isDialogOpen = true
                                 }
                             )
                             DropdownMenuItem(
-                                text = {Text("Reload")},
+                                text = { Text("Reload") },
                                 onClick = {
                                     vm.fetchForecast()
                                     isExpanded = false
@@ -75,7 +78,7 @@ fun HomeScreen(navController: NavController, vm: ForecastViewModel = viewModel()
                 }
             )
         }
-    ){ innerPadding ->
+    ) { innerPadding ->
         when {
             state.loading -> Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(
@@ -94,8 +97,8 @@ fun HomeScreen(navController: NavController, vm: ForecastViewModel = viewModel()
                 }
             }
         }
-        if (isDialogOpen == true){
-            SettingsDialog(onDismissRequest = {isDialogOpen = false}, onLocationChanged = {})
+        if (isDialogOpen == true) {
+            SettingsDialog(onDismissRequest = { isDialogOpen = false }, onLocationChanged = {})
         }
     }
 }

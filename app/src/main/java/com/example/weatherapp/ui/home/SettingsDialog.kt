@@ -21,9 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.weatherapp.GeoLocationViewModel
 
 @Composable
-fun SettingsDialog(onDismissRequest: () -> Unit, onLocationChanged: (location: String)-> Unit) {
+fun SettingsDialog(
+    onDismissRequest: () -> Unit, onLocationChanged: (location: String) -> Unit,
+    geoLocationVm: GeoLocationViewModel = viewModel(factory = GeoLocationViewModel.Factory)
+) {
     var location by remember { mutableStateOf("Vienna") }
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
@@ -32,7 +37,9 @@ fun SettingsDialog(onDismissRequest: () -> Unit, onLocationChanged: (location: S
                 .height(200.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)) {
                 Text(
                     text = "Current location: $location",
                     modifier = Modifier
@@ -46,6 +53,7 @@ fun SettingsDialog(onDismissRequest: () -> Unit, onLocationChanged: (location: S
                     }
                 )
                 Button(onClick = {
+                    geoLocationVm.fetch(location)
                     onLocationChanged(location)
                     onDismissRequest()
                 }) {
