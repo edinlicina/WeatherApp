@@ -12,6 +12,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,10 +28,18 @@ import com.example.weatherapp.GeoLocationViewModel
 
 @Composable
 fun SettingsDialog(
-    onDismissRequest: () -> Unit, onLocationChanged: (location: String) -> Unit,
+    onDismissRequest: () -> Unit,
     geoLocationVm: GeoLocationViewModel = viewModel(factory = GeoLocationViewModel.Factory)
 ) {
-    var location by remember { mutableStateOf("Vienna") }
+    val settings by geoLocationVm.state.collectAsState()
+    var location by remember { mutableStateOf("") }
+
+    LaunchedEffect(settings) {
+        settings?.let {
+            location = it.cityName
+        }
+    }
+
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
             modifier = Modifier
@@ -37,30 +47,32 @@ fun SettingsDialog(
                 .height(200.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)) {
-                Text(
-                    text = "Current location: $location",
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.Center),
-                    textAlign = TextAlign.Center,
-                )
-                TextField(
-                    value = location,
-                    onValueChange = { value ->
-                        location = value
-                    }
-                )
-                Button(onClick = {
-                    geoLocationVm.fetch(location)
-                    onLocationChanged(location)
-                    onDismissRequest()
-                }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                settings?.let {
                     Text(
-                        "Save"
+                        text = "Current location: ${it.cityName}",
+                        modifier = Modifier
+                            .wrapContentSize(Alignment.Center),
+                        textAlign = TextAlign.Center,
                     )
+                    TextField(
+                        value = location,
+                        onValueChange = { value ->
+                            location = value
+                        }
+                    )
+                    Button(onClick = {
+                        geoLocationVm.fetch(location)
+                        onDismissRequest()
+                    }) {
+                        Text("Save")
+                    }
                 }
+
             }
         }
     }

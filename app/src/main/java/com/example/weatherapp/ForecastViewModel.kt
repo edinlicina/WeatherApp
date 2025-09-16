@@ -26,7 +26,5 @@ class ForecastViewModel(private val repository: ForecastRepository = ForecastRep
                 onFailure = { UiStateForecast(error = it.message ?: "Unknown error") }
             )
         }
-
-
     }
 }

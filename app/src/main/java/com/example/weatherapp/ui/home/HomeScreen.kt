@@ -98,7 +98,7 @@ fun HomeScreen(
             }
         }
         if (isDialogOpen == true) {
-            SettingsDialog(onDismissRequest = { isDialogOpen = false }, onLocationChanged = {})
+            SettingsDialog(onDismissRequest = { isDialogOpen = false })
         }
     }
 }
