@@ -15,6 +15,9 @@ class GeoLocationRepository(
             api.getLocation(q = q)
         }
         result.onSuccess { response ->
+            if (response.isEmpty()) {
+                return@onSuccess
+            }
             val bestGuess = response[0]
             settingsDao.insertSettings(
                 SettingsEntity(
@@ -27,5 +30,4 @@ class GeoLocationRepository(
         }
         return result
     }
-
 }

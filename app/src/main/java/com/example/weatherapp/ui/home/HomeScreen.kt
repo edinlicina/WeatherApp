@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,13 +29,12 @@ import com.example.weatherapp.ForecastViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    vm: ForecastViewModel = viewModel(),
+    vm: ForecastViewModel = viewModel(factory = ForecastViewModel.Factory),
 ) {
     val state by vm.state.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) { vm.fetchForecast() }
     Scaffold(
         topBar = {
             TopAppBar(
