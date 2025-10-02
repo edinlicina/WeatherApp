@@ -31,7 +31,7 @@ fun HomeScreen(
     navController: NavController,
     vm: ForecastViewModel = viewModel(factory = ForecastViewModel.Factory),
 ) {
-    val state by vm.state.collectAsState()
+    val state by vm.forecastState.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
 
@@ -67,7 +67,7 @@ fun HomeScreen(
                             DropdownMenuItem(
                                 text = { Text("Reload") },
                                 onClick = {
-                                    vm.fetchForecast()
+                                    vm.refresh()
                                     isExpanded = false
                                 }
                             )
@@ -88,7 +88,7 @@ fun HomeScreen(
                 val data = state.data
                 if (data != null) {
                     CWeatherEntryList(
-                        weatherEntries = data.list,
+                        weatherEntries = data,
                         navController = navController,
                         modifier = Modifier.padding(innerPadding),
                     )

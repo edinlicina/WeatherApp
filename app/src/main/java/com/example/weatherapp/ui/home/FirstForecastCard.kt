@@ -11,19 +11,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.weatherapp.WeatherDataResponse
+import com.example.weatherapp.data.local.ForecastEntity
 import com.example.weatherapp.ui.getWeatherIconRes
 
 @Composable
 fun FirstForecastCard(
-    item: WeatherDataResponse,
+    item: ForecastEntity,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val iconCode = item.weather.firstOrNull()?.icon
-    val desc     = item.weather.firstOrNull()?.description ?: "—"
-    val tempC    = "${"%.1f".format(item.main.temp)} °C"
-    val dateTxt  = item.dt_txt
+    val iconCode = item.iconCode
+    val desc = item.description
+    val tempC = "${"%.1f".format(item.temperature)} °C"
+    val dateTxt = item.dateTime
 
     Card(
         onClick = onClick,

@@ -16,4 +16,7 @@ interface ForecastDao {
 
     @Query("DELETE FROM forecast")
     suspend fun clear()
+
+    @Query("SELECT * FROM forecast WHERE cityName = :cityName AND unit = :unit")
+    fun getByCityName(cityName: String, unit: String): Flow<List<ForecastEntity>>
 }

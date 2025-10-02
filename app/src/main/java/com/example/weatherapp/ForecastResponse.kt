@@ -1,16 +1,14 @@
 package com.example.weatherapp
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ForecastResponse (
+data class ForecastResponse(
     val cod: String,
     val message: Int,
     val cnt: Int,
     val list: List<WeatherDataResponse>,
     val city: CityResponse
-
 )
 
 @Serializable

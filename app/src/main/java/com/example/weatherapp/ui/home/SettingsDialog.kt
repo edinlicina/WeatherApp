@@ -34,23 +34,20 @@ import com.example.weatherapp.GeoLocationViewModel
 
 @Composable
 fun SettingsDialog(
+    modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
     geoLocationVm: GeoLocationViewModel = viewModel(factory = GeoLocationViewModel.Factory),
-    modifier: Modifier = Modifier
 ) {
     val settings by geoLocationVm.state.collectAsState()
+    val units = listOf("Standard", "Metric", "Imperial")
+
     var location by remember { mutableStateOf("") }
-
-
-    val units = listOf("Metric", "Imperial", "Default")
-    val (selectedUnit, onUnitSelected) = remember { mutableStateOf(units[0]) }
-
-
-
+    var (selectedUnit, onUnitSelected) = remember { mutableStateOf("") }
 
     LaunchedEffect(settings) {
         settings?.let {
             location = it.cityName
+            selectedUnit = it.unit.replaceFirstChar { it.uppercase() }
         }
     }
 
@@ -108,7 +105,10 @@ fun SettingsDialog(
                         }
                     }
                     Button(onClick = {
-                        geoLocationVm.fetch(location)
+                        geoLocationVm.saveSettings(
+                            cityName = location,
+                            unit = selectedUnit.lowercase()
+                        )
                         onDismissRequest()
                     }) {
                         Text("Save")

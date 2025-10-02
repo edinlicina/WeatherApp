@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.weatherapp.DetailScreenRoute
-import com.example.weatherapp.WeatherDataResponse
+import com.example.weatherapp.data.local.ForecastEntity
 
 @Composable
 fun CWeatherEntryList(
-    weatherEntries: List<WeatherDataResponse>,
+    weatherEntries: List<ForecastEntity>,
     modifier: Modifier = Modifier,
     navController: NavController
 ) {
@@ -23,15 +23,15 @@ fun CWeatherEntryList(
             val onClick = {
                 navController.navigate(
                     DetailScreenRoute(
-                        icon = weatherEntry.weather[0].icon,
-                        condition = weatherEntry.weather[0].description,
-                        dateTime = weatherEntry.dt_txt,
-                        temperature = weatherEntry.main.temp_max.toString(),
-                        pressure = weatherEntry.main.pressure.toString(),
-                        humidity = weatherEntry.main.humidity.toString(),
-                        cloudCover = weatherEntry.clouds.all.toString(),
-                        windSpeed = weatherEntry.wind.speed.toString(),
-                        windDirection = weatherEntry.wind.deg.toString(),
+                        icon = weatherEntry.iconCode,
+                        condition = weatherEntry.description,
+                        dateTime = weatherEntry.dateTime,
+                        temperature = weatherEntry.temperature.toString(),
+                        pressure = weatherEntry.pressure.toString(),
+                        humidity = weatherEntry.humidity.toString(),
+                        cloudCover = weatherEntry.cloudCover.toString(),
+                        windSpeed = weatherEntry.windSpeed.toString(),
+                        windDirection = weatherEntry.windDirection.toString(),
                         rain = "Nope",
                         snow = "Nope",
                     )

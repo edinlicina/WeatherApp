@@ -8,5 +8,6 @@ data class SettingsEntity(
     @PrimaryKey val id: Int = 0,
     val cityName: String = "Vienna",
     val cityLat: Float = 48.2083537f,
-    val cityLon: Float = 16.3725042f
+    val cityLon: Float = 16.3725042f,
+    val unit: String = "metric",
 )

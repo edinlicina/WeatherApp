@@ -18,9 +18,9 @@ class GeoLocationViewModel(private val repository: GeoLocationRepository) : View
         initialValue = null
     )
 
-    fun fetch(q: String) {
+    fun saveSettings(cityName: String, unit: String) {
         viewModelScope.launch {
-            repository.loadLocation(q)
+            repository.saveSettings(cityName = cityName, unit = unit)
         }
     }
 

@@ -5,49 +5,43 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.weatherapp.data.local.DatabaseProvider
-import com.example.weatherapp.data.local.SettingsEntity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.example.weatherapp.data.local.ForecastEntity
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 data class UiStateForecast(
     val loading: Boolean = false,
-    val data: ForecastResponse? = null,
+    val data: List<ForecastEntity>? = null,
     val error: String? = null
 )
 
 class ForecastViewModel(
     private val forecastRepository: ForecastRepository,
-    private val geoLocationRepository: GeoLocationRepository,
-) :
-    ViewModel() {
-    private val _state = MutableStateFlow(UiStateForecast(loading = true))
-
-    val settings = geoLocationRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000L),
-        initialValue = SettingsEntity(),
-    )
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val state: StateFlow<UiStateForecast> =
-        settings
-            .flatMapLatest { s ->
-                flow {
-                    emit(UiStateForecast(loading = true))
-                    val result = forecastRepository.loadForecast("${s.cityLat}", "${s.cityLon}")
-                    emit(
-                        result.fold(
-                            onSuccess = { UiStateForecast(data = it) },
-                            onFailure = { UiStateForecast(error = it.message ?: "Unknown error") }
-                        )
+) : ViewModel() {
+    val forecastState: StateFlow<UiStateForecast> =
+        forecastRepository.getForecast()
+            .map<List<ForecastEntity>, UiStateForecast> { entities ->
+                UiStateForecast(
+                    loading = false,
+                    data = entities,
+                    error = null
+                )
+            }
+            .onStart {
+                emit(UiStateForecast(loading = true))
+            }
+            .catch { e ->
+                emit(
+                    UiStateForecast(
+                        loading = false,
+                        data = null,
+                        error = e.message ?: "Unknown error"
                     )
-                }
+                )
             }
             .stateIn(
                 scope = viewModelScope,
@@ -55,15 +49,8 @@ class ForecastViewModel(
                 initialValue = UiStateForecast(loading = true)
             )
 
-    fun fetchForecast() {
-        _state.value = UiStateForecast(loading = true)
-        viewModelScope.launch {
-            val result = forecastRepository.loadForecast("48.2083537", "16.3725042")
-            _state.value = result.fold(
-                onSuccess = { UiStateForecast(data = it) },
-                onFailure = { UiStateForecast(error = it.message ?: "Unknown error") }
-            )
-        }
+    fun refresh() {
+        forecastRepository.refresh(force = true)
     }
 
     companion object {
@@ -73,12 +60,12 @@ class ForecastViewModel(
                 val application =
                     checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
                 val database = DatabaseProvider.get(application)
-                val forecastRepository = ForecastRepository()
-                val geoLocationRepository =
-                    GeoLocationRepository(settingsDao = database.settingsDao())
+                val forecastRepository = ForecastRepository(
+                    settingsDao = database.settingsDao(),
+                    forecastDao = database.forecastDao(),
+                )
                 return ForecastViewModel(
                     forecastRepository = forecastRepository,
-                    geoLocationRepository = geoLocationRepository
                 ) as T
             }
         }

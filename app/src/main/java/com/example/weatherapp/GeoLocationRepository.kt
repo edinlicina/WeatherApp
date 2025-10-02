@@ -10,9 +10,9 @@ class GeoLocationRepository(
 ) {
     val settings = settingsDao.getLatestSettings().map { it ?: SettingsEntity() }
 
-    suspend fun loadLocation(q: String): Result<List<GeoLocationResponse>> {
+    suspend fun saveSettings(cityName: String, unit: String): Result<List<GeoLocationResponse>> {
         val result = runCatching {
-            api.getLocation(q = q)
+            api.getLocation(q = cityName)
         }
         result.onSuccess { response ->
             if (response.isEmpty()) {
@@ -24,7 +24,8 @@ class GeoLocationRepository(
                     id = 0,
                     cityName = bestGuess.name,
                     cityLat = bestGuess.lat,
-                    cityLon = bestGuess.lon
+                    cityLon = bestGuess.lon,
+                    unit = unit,
                 )
             )
         }

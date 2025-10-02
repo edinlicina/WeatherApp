@@ -14,6 +14,7 @@ data class ForecastEntity(
     val humidity: Float,
     val cloudCover: Int,
     val windSpeed: Float,
-    val windDirection: Int
-
+    val windDirection: Int,
+    val cityName: String,
+    val unit: String
 )
