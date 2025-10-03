@@ -1,5 +1,7 @@
 package com.example.weatherapp.ui.home
 
+import NotificationService
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,25 +17,49 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.weatherapp.ForecastViewModel
+import com.example.weatherapp.UiEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
+@RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
 @Composable
 fun HomeScreen(
     navController: NavController,
     vm: ForecastViewModel = viewModel(factory = ForecastViewModel.Factory),
 ) {
+    val context = LocalContext.current
     val state by vm.forecastState.collectAsState()
     var isExpanded by remember { mutableStateOf(false) }
     var isDialogOpen by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        vm.effects.collect { effect ->
+            when (effect) {
+                is UiEffect.ShowNotification -> {
+                    if (!NotificationService.canPostNotifications(context)) {
+                        return@collect
+                    }
+                    NotificationService.showNotification(
+                        context,
+                        id = effect.hashCode(),
+                        title = effect.title,
+                        text = effect.text,
+                        icon = effect.icon,
+                    )
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {

@@ -50,7 +50,6 @@ class MainActivity : ComponentActivity() {
         NotificationService.init(this)
 
         maybeRequestNotificationPermission()
-        NotificationService.showNotification(this, 1, "Title", "Text")
         enqueueForecastWorker()
 
         enableEdgeToEdge()

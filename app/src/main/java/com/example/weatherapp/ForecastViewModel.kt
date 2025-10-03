@@ -12,11 +12,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
 sealed interface UiEffect {
-    data class ShowNotification(val id: Int, val title: String, val text: String) : UiEffect
+    data class ShowNotification(
+        val id: Int,
+        val title: String,
+        val text: String,
+        val icon: String
+    ) : UiEffect
 }
 
 data class UiStateForecast(
@@ -28,15 +34,27 @@ data class UiStateForecast(
 class ForecastViewModel(
     private val forecastRepository: ForecastRepository,
 ) : ViewModel() {
-    private val _effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1)
+    private val _effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 10)
     val effects: SharedFlow<UiEffect> = _effects
 
     val forecastState: StateFlow<UiStateForecast> =
         forecastRepository.getForecast()
-            .map<List<ForecastEntity>, UiStateForecast> { entities ->
+            .onEach { result ->
+                result.changed.forEach { entity ->
+                    _effects.tryEmit(
+                        UiEffect.ShowNotification(
+                            id = entity.id,
+                            title = "Weather Update for ${entity.cityName}",
+                            text = "The entry for ${entity.dateTime} changed. The temperature is ${entity.temperature} degrees (${entity.unit}).",
+                            icon = entity.iconCode,
+                        )
+                    )
+                }
+            }
+            .map<GetForecastReturn, UiStateForecast> { forecast ->
                 UiStateForecast(
                     loading = false,
-                    data = entities,
+                    data = forecast.all,
                     error = null
                 )
             }

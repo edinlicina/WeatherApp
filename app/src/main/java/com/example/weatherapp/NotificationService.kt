@@ -8,7 +8,7 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.example.weatherapp.R
+import com.example.weatherapp.ui.getWeatherIconRes
 
 object NotificationService {
     private const val CHANNEL_GENERAL = "weather_general"
@@ -24,7 +24,7 @@ object NotificationService {
         )
     }
 
-    private fun canPostNotifications(context: Context): Boolean {
+    fun canPostNotifications(context: Context): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
@@ -36,10 +36,12 @@ object NotificationService {
         id: Int,
         title: String,
         text: String,
+        icon: String,
         pendingIntent: PendingIntent? = null
     ) {
+        val iconResource = getWeatherIconRes(icon)
         val builder = NotificationCompat.Builder(context, CHANNEL_GENERAL)
-            .setSmallIcon(R.drawable.ic_unknown)
+            .setSmallIcon(iconResource)
             .setContentTitle(title)
             .setContentText(text)
             .setAutoCancel(true)
