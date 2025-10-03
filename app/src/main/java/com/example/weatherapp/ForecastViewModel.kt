@@ -6,12 +6,18 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.weatherapp.data.local.DatabaseProvider
 import com.example.weatherapp.data.local.ForecastEntity
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+
+sealed interface UiEffect {
+    data class ShowNotification(val id: Int, val title: String, val text: String) : UiEffect
+}
 
 data class UiStateForecast(
     val loading: Boolean = false,
@@ -22,6 +28,9 @@ data class UiStateForecast(
 class ForecastViewModel(
     private val forecastRepository: ForecastRepository,
 ) : ViewModel() {
+    private val _effects = MutableSharedFlow<UiEffect>(extraBufferCapacity = 1)
+    val effects: SharedFlow<UiEffect> = _effects
+
     val forecastState: StateFlow<UiStateForecast> =
         forecastRepository.getForecast()
             .map<List<ForecastEntity>, UiStateForecast> { entities ->

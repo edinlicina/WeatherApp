@@ -8,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
@@ -19,6 +18,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class ForecastKey(
     val cityName: String,
@@ -27,12 +29,20 @@ data class ForecastKey(
     val unit: String
 )
 
+data class GetForecastReturn(
+    val all: List<ForecastEntity>
+)
+
 class ForecastRepository(
     private val api: ForecastService = ApiModule.forecastService,
     private val forecastDao: ForecastDao,
     private val settingsDao: SettingsDao
 ) {
     private val refreshRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
+
+    suspend fun clear() {
+        forecastDao.clear()
+    }
 
     fun refresh(force: Boolean = true) {
         refreshRequests.tryEmit(force)
@@ -51,6 +61,15 @@ class ForecastRepository(
                 ).flatMapLatest { force ->
                     flow {
                         val local = forecastDao.getByCityName(key.cityName, key.unit).first()
+                        if (local.isNotEmpty()) {
+                            val oldTimeStamp = local[0].dateTime
+                            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                            val oldDate: Date = sdf.parse(oldTimeStamp)!!
+                            val currentDate = Date()
+                            if (currentDate.after(oldDate)) {
+                                fetchForecast(lat = key.lat, lon = key.lon, cityName = key.cityName)
+                            }
+                        }
                         if (force || local.isEmpty()) {
                             fetchForecast(lat = key.lat, lon = key.lon, cityName = key.cityName)
                         }
